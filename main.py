@@ -1,10 +1,9 @@
-import asyncio
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.widgets import Header, Footer, Input, Label, DataTable
+from textual.widgets import Header, Footer, Input, DataTable
 import os
 from collections import OrderedDict
-from thefuzz import fuzz, process
+from thefuzz import process
 from functools import cache
 
 
@@ -15,66 +14,55 @@ def read_history():
         bytes = file.read()
     text = bytes.decode("utf-8", "ignore")
     lines = text.split("\n")
-    commands = [line.rsplit(";", 1)[-1] for line in lines if line.strip()]
+    commands = [line.rsplit(";", 1)[-1].strip() for line in lines if line.strip()]
     unique_list = list(OrderedDict.fromkeys(commands))
     unique_list.reverse()
     return unique_list
 
 
+history = read_history()
+
+
 @cache
-def get_table_data():
-    history = read_history()
-    tuple_history = [(line,) for line in history]
+def search_result(query):
+    if not query:
+        return []
+
+    fuzzy_history = process.extract(query, history, limit=50)
+    unique_list = list(OrderedDict.fromkeys(fuzzy_history))
+    tuple_history = [(line,) for line, score in unique_list if score >= 80]
     return tuple_history
-
-
-# history = read_history()
-# tuple_history = [(line,) for line in history]
-# first_row = ("command",)
-# tuple_history.insert(0, first_row)
-# ROWS = tuple_history
 
 
 class HistorySearchApp(App):
     BINDINGS = [
-        ("d", "toggle_dark", "toggle dark mode"),
         Binding("ctrl+c", "app.quit", "Quit", show=True),
     ]
     current_sorts: set = set()
 
-    def compose(self) -> ComposeResult:
+    def compose(self):
         yield Header()
-        yield Label("Search zsh history (reverse-i-search improved) ")
         yield Input(placeholder="search", type="text")
         yield DataTable()
         yield Footer()
 
-    def on_mount(self) -> None:
+    def on_mount(self):
+        pass
         table = self.query_one(DataTable)
-        data = get_table_data()
-        first_row = ("command",)
-        table.add_columns(first_row)
-        table.add_rows(data)
+        table.add_columns(("header",))
         table.show_header = False
 
     def update_cell(self):
         pass
 
-    def action_toggle_dark(self) -> None:
+    def action_toggle_dark(self):
         self.dark = not self.dark
 
-    def on_input_changed(self, message) -> None:
+    def on_input_changed(self, message):
         table = self.query_one(DataTable)
-        if message.value:
-            history = read_history()
-            fuzzy_history = process.extract(message.value, history, scorer=fuzz.ratio)
-            tuple_history = [(line,) for line, score in fuzzy_history]
-            table.clear()
-            table.add_rows(tuple_history)
-        else:
-            table.clear()
-            data = get_table_data()
-            table.add_rows(data)
+        table.clear()
+        result = search_result(message.value)
+        table.add_rows(result)
 
 
 if __name__ == "__main__":
