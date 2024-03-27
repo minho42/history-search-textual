@@ -11,3 +11,4 @@ textual app trying to improve `reverse-i-search` with fuzzy search
 - slow
 - fuzzy search not so fantastic
 - not easy to navigate the search result
+- no debounce with search query
