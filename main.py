@@ -74,7 +74,7 @@ class HistorySearchApp(App):
     def action_toggle_dark(self):
         self.dark = not self.dark
 
-    @debounce(1)
+    @debounce(0.3)
     def on_input_changed(self, message):
         table = self.query_one(DataTable)
         table.clear()
