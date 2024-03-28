@@ -3,8 +3,27 @@ from textual.binding import Binding
 from textual.widgets import Header, Footer, Input, DataTable
 import os
 from collections import OrderedDict
-from thefuzz import process
-from functools import cache
+from functools import cache, wraps
+import threading
+
+
+def debounce(seconds):
+    def decorator(func):
+        @wraps(func)
+        def debounced(*args, **kwargs):
+            def call_it():
+                func(*args, **kwargs)
+
+            try:
+                debounced.t.cancel()
+            except AttributeError:
+                pass
+            debounced.t = threading.Timer(seconds, call_it)
+            debounced.t.start()
+
+        return debounced
+
+    return decorator
 
 
 @cache
@@ -27,11 +46,8 @@ history = read_history()
 def search_result(query):
     if not query:
         return []
-
-    fuzzy_history = process.extract(query, history, limit=50)
-    unique_list = list(OrderedDict.fromkeys(fuzzy_history))
-    tuple_history = [(line,) for line, score in unique_list if score >= 80]
-    return tuple_history
+    result = [(line,) for line in history if query.lower() in line.lower()]
+    return result
 
 
 class HistorySearchApp(App):
@@ -58,6 +74,7 @@ class HistorySearchApp(App):
     def action_toggle_dark(self):
         self.dark = not self.dark
 
+    @debounce(1)
     def on_input_changed(self, message):
         table = self.query_one(DataTable)
         table.clear()
