@@ -1,4 +1,4 @@
-from textual.app import App, ComposeResult
+from textual.app import App
 from textual.binding import Binding
 from textual.widgets import Header, Footer, Input, DataTable
 import os
@@ -67,12 +67,6 @@ class HistorySearchApp(App):
         table = self.query_one(DataTable)
         table.add_columns(("header",))
         table.show_header = False
-
-    def update_cell(self):
-        pass
-
-    def action_toggle_dark(self):
-        self.dark = not self.dark
 
     @debounce(0.3)
     def on_input_changed(self, message):
