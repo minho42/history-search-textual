@@ -6,6 +6,16 @@ textual app trying to improve reverse-i-search
 
 ![alt text](screenshot.webp)
 
-## issues
+## use
 
-- not easy to navigate the search result
+use globally with alias
+
+```sh
+# .zshrc
+alias myhistory="cd /Users/minhokim/code/python/history-search-textual && source venv/bin/activate && python main.py"
+```
+
+```shell
+# run
+myhistory
+```
