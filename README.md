@@ -1,6 +1,6 @@
 # history-search-textual
 
-textual app trying to improve reverse-i-search
+textual app for reverse-i-search
 
 ## screenshot
 
@@ -8,11 +8,13 @@ textual app trying to improve reverse-i-search
 
 ## use
 
+install dependencies
+
 use globally with alias
 
 ```sh
 # .zshrc
-alias myhistory="cd /Users/minhokim/code/python/history-search-textual && source venv/bin/activate && python main.py"
+alias myhistory="cd /Users/.../history-search-textual && source venv/bin/activate && python3 main.py"
 ```
 
 ```shell
